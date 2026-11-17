@@ -52,6 +52,9 @@ let Q = store.get("eh.q") || (litePref ? (litePref === "1" ? "low" : "high") : "
 let LITE = Q !== "auto" ? Q === "low"
   : navigator.userAgentData?.mobile === true || matchMedia("(pointer: coarse)").matches
     || (navigator.deviceMemory || 8) <= 3 || (navigator.hardwareConcurrency || 8) <= 4;
+// مودِ افرادِ بهانه‌گیر: همه‌چیز معمولی، تیره و روان
+let PLAIN = store.get("eh.theme") === "plain";
+document.documentElement.classList.toggle("plain", PLAIN);
 const setLite = (on) => {
   LITE = on;
   document.documentElement.classList.toggle("lite", on);
@@ -98,7 +101,7 @@ function initCosmos() {
   let lastT = 0, nextMeasure = 0, cx = 0, cy = 0;
   function frame(t) {
     // زیرِ شیشه‌ی تار، هر فریمِ تازه یعنی محاسبه‌ی دوباره‌ی تاری؛ پس در صفحه‌ی بازی آرام‌تر می‌کشیم
-    const gap = LITE ? 2000 : current === "table" ? 66 : 0;
+    const gap = LITE || PLAIN ? 2000 : current === "table" ? 66 : 0;
     if (gap && t - lastT < gap) return requestAnimationFrame(frame);
     const step = lastT ? Math.min(6, (t - lastT) / 16.7) : 1;   // سرعتِ چرخش به تعدادِ فریم وابسته نباشد
     lastT = t;
@@ -427,6 +430,24 @@ function initMenu() {
     }
   };
   paintQ();
+  const tBtns = [...document.querySelectorAll("[data-theme]")];
+  const paintT = () => {
+    for (const b of tBtns) {
+      const on = (b.dataset.theme === "plain") === PLAIN;
+      b.classList.toggle("primary", on);
+      b.classList.toggle("ghost", !on);
+      b.setAttribute("aria-pressed", on);
+    }
+  };
+  paintT();
+  for (const b of tBtns) {
+    b.addEventListener("click", () => {
+      PLAIN = b.dataset.theme === "plain";
+      store.set("eh.theme", PLAIN ? "plain" : "space");
+      document.documentElement.classList.toggle("plain", PLAIN);
+      paintT();
+    });
+  }
   $("#set-open").addEventListener("click", () => { $("#settings").hidden = !$("#settings").hidden; });
   for (const b of qBtns) {
     b.addEventListener("click", () => {

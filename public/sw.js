@@ -1,7 +1,7 @@
 // کشِ ساده برای اینکه بازی با ربات بدونِ اینترنت هم باز شود.
 // همیشه اول از شبکه می‌گیرد (تا نسخه‌ی تازه بیاید) و فقط وقتی شبکه نیست از کش می‌خواند.
 
-const CACHE = "eh-v27";
+const CACHE = "eh-v28";
 const FILES = [
   "./", "./style.css", "./app.js", "./bots.js", "./bot-engine.js", "./bot-worker.js",
   "./export-format.js", "./vendor/chess.js", "./fonts/AbarFaNum-VF.woff2",

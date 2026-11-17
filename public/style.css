@@ -1063,3 +1063,28 @@ html.mid .board-frame { background: var(--glass), rgba(10, 13, 28, .84); }
 html.mid .btn.ghost { background: linear-gradient(180deg, rgba(64, 70, 102, .96), rgba(34, 38, 62, .96)); }
 html.mid .promo { background: rgba(4, 5, 10, .94); }
 html.mid .nebula, html.mid .hole .halo { animation: none; }
+
+/* ═════════════ مودِ افرادِ بهانه‌گیر: معمولی، تیره، روان ═════════════ */
+.t-row { grid-template-columns: 1fr 2fr; }
+html.plain body { background: #141518; }
+html.plain .stars, html.plain .nebula, html.plain .hole, html.plain .board-wrap::before { display: none !important; }
+html.plain .glass, html.plain .btn.ghost, html.plain .promo, html.plain .board-frame {
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+html.plain .glass { background: #1e2025; border-color: #2c2f36; box-shadow: 0 6px 18px rgba(0, 0, 0, .35); }
+html.plain .glass::before { display: none; }
+html.plain .btn.ghost { background: #2a2d34; box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 2px 6px rgba(0, 0, 0, .3); }
+html.plain .board-frame { background: #1e2025; box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+html.plain .board { border-radius: 6px; box-shadow: 0 0 0 1px #000; }
+html.plain .sq { background: #8e97a8; box-shadow: none; }
+html.plain .sq.d { background: #4e5668; box-shadow: none; }
+html.plain .sq.last::before { background: rgba(240, 200, 90, .32); box-shadow: none; }
+html.plain .pc-w { fill: url(#pw); stroke: #1b1c20; stroke-width: 2.2; filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, .5)); }
+html.plain .pc-b { fill: url(#pb); stroke: #c9ccd3; stroke-width: 1.6; filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, .55)); }
+html.plain .pc-w .dot { fill: #1b1c20; }
+html.plain .pc-b .dot { fill: #c9ccd3; }
+html.plain .nebula, html.plain .sq.chk::before, html.plain .sq.opt::after { animation: none; }
+html.plain .btn, html.plain .choice, html.plain .bot, html.plain .sq::before { transition: none; }
+/* مودِ بهانه‌گیر: سایه‌ی راهنما ۳۰٪ کم‌رنگ‌تر (۰٫۷۲→۰٫۵۰، ۰٫۷۸→۰٫۵۵) */
+html.plain .sq.hint-from .pc-w { filter: drop-shadow(3.94px .69px 2.5px rgba(0, 0, 0, .504)); }
+html.plain .sq.hint-from .pc-b { filter: drop-shadow(3.94px .69px 2.5px rgba(0, 0, 0, .546)); }
