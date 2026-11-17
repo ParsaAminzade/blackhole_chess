@@ -1,10 +1,10 @@
 // کشِ ساده برای اینکه بازی با ربات بدونِ اینترنت هم باز شود.
 // همیشه اول از شبکه می‌گیرد (تا نسخه‌ی تازه بیاید) و فقط وقتی شبکه نیست از کش می‌خواند.
 
-const CACHE = "eh-v25";
+const CACHE = "eh-v26";
 const FILES = [
-  "/", "/style.css", "/app.js", "/bots.js", "/bot-engine.js", "/bot-worker.js",
-  "/export-format.js", "/vendor/chess.js", "/fonts/AbarFaNum-VF.woff2",
+  "./", "./style.css", "./app.js", "./bots.js", "./bot-engine.js", "./bot-worker.js",
+  "./export-format.js", "./vendor/chess.js", "./fonts/AbarFaNum-VF.woff2",
 ];
 
 self.addEventListener("install", (e) => {
@@ -24,7 +24,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin || url.pathname.startsWith("/api/")) return;
-  if (url.pathname.startsWith("/vendor/")) {
+  if (url.pathname.includes("/vendor/")) {
     e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
       return res;
@@ -36,13 +36,13 @@ self.addEventListener("fetch", (e) => {
       .then((res) => {
         if (res.ok) {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(url.pathname === "/" ? "/" : e.request, copy));
+          caches.open(CACHE).then((c) => c.put(e.request.mode === "navigate" ? "./" : e.request, copy));
         }
         return res;
       })
       .catch(async () =>
         (await caches.match(e.request)) ||
-        (e.request.mode === "navigate" ? caches.match("/") : Response.error())
+        (e.request.mode === "navigate" ? caches.match("./") : Response.error())
       )
   );
 });

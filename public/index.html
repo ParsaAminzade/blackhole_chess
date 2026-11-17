@@ -7,8 +7,8 @@
   <meta name="description" content="شطرنج با ربات یا آنلاین با دوست. همه‌ی حرکت‌ها ذخیره می‌شود.">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#04050a">
-  <link rel="preload" href="/fonts/AbarFaNum-VF.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="preload" href="./fonts/AbarFaNum-VF.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <!-- فضا: ستاره‌ها و ابرهای رنگی پشتِ همه‌چیز -->
@@ -32,14 +32,14 @@
   </svg>
 
   <header class="bar glass">
-    <a class="brand" href="/#menu" id="brand" aria-label="افق رویداد، منوی اصلی">
+    <a class="brand" href="./#menu" id="brand" aria-label="افق رویداد، منوی اصلی">
       <i class="brand-mark" aria-hidden="true"></i>
       <span>افق رویداد</span>
     </a>
     <div class="bar-end">
       <span class="conn" id="conn" role="status" hidden></span>
       <span class="who" id="who" hidden>
-        <a class="link" id="who-name" href="/#profile"></a>
+        <a class="link" id="who-name" href="./#profile"></a>
         <button type="button" class="link" id="logout">خروج</button>
       </span>
     </div>
@@ -142,7 +142,7 @@
   <!-- پروفایل -->
   <main id="profile" class="screen profile" hidden>
     <section class="card glass profile-card">
-      <a class="link" href="/#menu">بازگشت به منو</a>
+      <a class="link" href="./#menu">بازگشت به منو</a>
       <div class="pf-head">
         <div class="pf-level"><small>سطح</small><b id="pf-level">–</b></div>
         <div><h1 id="pf-name"></h1><p class="sub" id="pf-kind"></p></div>
@@ -266,8 +266,8 @@
           <button type="button" class="btn ghost danger" id="resign-yes">بله، تسلیم می‌شوم</button>
           <button type="button" class="btn ghost" id="resign-no">نه</button>
         </span>
-        <a class="btn primary" id="again" href="/#menu" hidden>بازی جدید</a>
-        <a class="btn ghost" id="to-menu" href="/#menu">منو</a>
+        <a class="btn primary" id="again" href="./#menu" hidden>بازی جدید</a>
+        <a class="btn ghost" id="to-menu" href="./#menu">منو</a>
       </section>
     </aside>
   </main>
@@ -276,7 +276,7 @@
     <div class="card glass">
       <h1>بازی پیدا نشد</h1>
       <p>لینک را دوباره بررسی کنید یا یک بازی جدید بسازید.</p>
-      <a class="btn primary" href="/#menu">منوی اصلی</a>
+      <a class="btn primary" href="./#menu">منوی اصلی</a>
     </div>
   </main>
 
@@ -311,6 +311,6 @@
     </form>
   </section>
 
-  <script src="/app.js" type="module"></script>
+  <script src="./app.js" type="module"></script>
 </body>
 </html>

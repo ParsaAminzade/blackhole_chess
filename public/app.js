@@ -4,6 +4,12 @@
 // هر وقت اینترنت باشد، روی سرور هم ثبت می‌شود.
 
 import { Chess } from "./vendor/chess.js";
+// روی GitHub Pages سرور نداریم؛ API و اتصالِ زنده از Cloudflare می‌آید
+const API = location.hostname.endsWith("github.io") ? "https://event-horizon-chess.p128parsa.workers.dev" : "";
+const HOME = location.origin + location.pathname;
+const _fetch = window.fetch.bind(window);
+const fetch = (u, o = {}) => _fetch(typeof u === "string" && u.startsWith("/api/") ? API + u : u,
+  API ? { credentials: "include", ...o } : o);
 import { BOTS, botById } from "./bots.js";
 import { formatGame } from "./export-format.js";
 
@@ -298,7 +304,7 @@ function initAuth() {
     session.known = false;
     store.set("eh.account", "0");
     store.set("eh.known", "0");
-    location.href = "/";
+    location.href = HOME;
   });
 
   // اگر نشستِ حساب روی سرور تمام شده باشد، دوباره ورود می‌خواهد
@@ -361,7 +367,7 @@ async function loadUnfinished() {
     else el.querySelector(".avatar").className = "orb " + (g.color === "b" ? "orb-b" : "orb-w");
     el.querySelector("b").textContent = title;
     el.querySelector("small").textContent = `${g.moves} حرکت${side}`;
-    el.addEventListener("click", () => (b ? resumeBotFromServer(g, el) : (location.href = "/?g=" + g.id)));
+    el.addEventListener("click", () => (b ? resumeBotFromServer(g, el) : (location.href = HOME + "?g=" + g.id)));
     list.appendChild(el);
   }
 }
@@ -400,7 +406,7 @@ async function createOnline(mode, side, btn) {
     });
     if (!res.ok) throw new Error(res.status);
     const { id } = await res.json();
-    location.href = "/?g=" + id;
+    location.href = HOME + "?g=" + id;
   } catch {
     err.textContent = "بازی ساخته نشد. این حالت به اینترنت نیاز دارد؛ اتصال را بررسی کنید.";
     err.hidden = false;
@@ -631,7 +637,7 @@ function askBot(botId, sans) {
   // ربات در یک رشته‌ی جدا فکر می‌کند؛ اگر مرورگر نتواند، در همین رشته
   if (worker === null) {
     try {
-      worker = new Worker("/bot-worker.js", { type: "module" });
+      worker = new Worker("./bot-worker.js", { type: "module" });
       worker.onmessage = (e) => { pending.get(e.data.id)?.(e.data); pending.delete(e.data.id); };
       worker.onerror = () => { worker = false; for (const f of pending.values()) f({ retry: true }); pending.clear(); };
     } catch { worker = false; }
@@ -738,7 +744,7 @@ function setConn(kind, text) {
 function connect() {
   setConn("", "در حال اتصال…");
   const proto = location.protocol === "https:" ? "wss" : "ws";
-  ws = new WebSocket(`${proto}://${location.host}/api/games/${gameId}/ws`);
+  ws = new WebSocket(API ? API.replace("https", "wss") + `/api/games/${gameId}/ws` : `${proto}://${location.host}/api/games/${gameId}/ws`);
 
   ws.onopen = () => {
     retry = 0;
@@ -826,7 +832,7 @@ function askStockfish(moves) {
   if (sf === false) return Promise.reject(new Error("no stockfish"));
   if (!sf) {
     sfReady = new Promise((ready, fail) => {
-      try { sf = new Worker("/vendor/stockfish/stockfish-19-lite-single.js"); }
+      try { sf = new Worker("./vendor/stockfish/stockfish-19-lite-single.js"); }
       catch (err) { sf = false; return fail(err); }
       const dead = (err) => { sf = false; fail(err); sfJob?.reject(err); sfJob = null; };
       sf.onerror = dead;
@@ -1049,7 +1055,7 @@ function renderPlayers() {
 
   const waiting = S.status === "waiting" && !!S.you;
   $("#invite").hidden = !waiting;
-  if (waiting) $("#invite-link").value = `${location.origin}/?g=${S.id}`;
+  if (waiting) $("#invite-link").value = `${HOME}?g=${S.id}`;
 }
 
 function renderSaved() {
@@ -1062,7 +1068,7 @@ function renderSaved() {
     dl.removeAttribute("download");
   } else {
     const as = S.you === "w" || S.you === "b" ? `?as=${S.you}` : "";
-    dl.href = `/api/games/${S.id}/export${as}`;
+    dl.href = API + `/api/games/${S.id}/export${as}`;
     dl.setAttribute("download", `chess-game-${S.id}.md`);
   }
   dl.classList.toggle("primary", S.status === "over");
@@ -1309,7 +1315,7 @@ if ("serviceWorker" in navigator) {
       setTimeout(() => location.reload(), 3000);
     };
   };
-  addEventListener("load", () => navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).then((reg) => {
+  addEventListener("load", () => navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).then((reg) => {
     offer(reg);
     reg.addEventListener("updatefound", () => {
       const w = reg.installing;

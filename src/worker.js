@@ -80,8 +80,29 @@ function newId() {
 
 /* ───────────── ورودی Worker ───────────── */
 
+const PAGES = "https://parsaaminzade.github.io";
 export default {
   async fetch(req, env) {
+    const cross = req.headers.get("Origin") === PAGES;
+    if (cross && req.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: {
+        "Access-Control-Allow-Origin": PAGES, "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "GET, POST, PUT", "Access-Control-Allow-Headers": "content-type",
+        "Access-Control-Max-Age": "86400", Vary: "Origin",
+      } });
+    }
+    const res = await route(req, env);
+    if (!cross || res.status === 101) return res;
+    const out = new Response(res.body, res);
+    out.headers.set("Access-Control-Allow-Origin", PAGES);
+    out.headers.set("Access-Control-Allow-Credentials", "true");
+    out.headers.append("Vary", "Origin");
+    return out;
+  },
+};
+
+async function route(req, env) {
+  {
     const { pathname } = new URL(req.url);
     try {
       if (pathname === "/api/games" && req.method === "POST") return createGame(req, env);
@@ -108,8 +129,8 @@ export default {
       console.error(err);
       return json({ error: "server_error" }, 500);
     }
-  },
-};
+  }
+}
 
 async function createGame(req, env) {
   let body;
@@ -286,7 +307,7 @@ function sameString(a, b) {
 }
 
 const sessionCookie = (token, maxAge) =>
-  `eh_s=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
+  `eh_s=${token}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=${maxAge}`;
 
 function readCookie(req) {
   const m = (req.headers.get("Cookie") || "").match(/(?:^|;\s*)eh_s=([a-f0-9]{64})/);
