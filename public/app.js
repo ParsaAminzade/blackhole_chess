@@ -1002,8 +1002,18 @@ function renderBoard(animate) {
     }
   }
 
-  if (animate && last) slide(last, flip);
+  if (animate && last) { slide(last, flip); voice(last); }
   perf.render = performance.now() - t0;
+}
+
+// صدا: مات، کیش، یا زدنِ مهره
+const VOICES = {};
+function voice(m) {
+  const k = m.san?.endsWith("#") ? "mate" : m.san?.endsWith("+") ? "check" : m.captured || m.san?.includes("x") ? "capture" : null;
+  if (!k) return;
+  const a = VOICES[k] ||= new Audio("./sounds/" + k + ".ogg");
+  a.currentTime = 0;
+  a.play().catch(() => {});
 }
 
 // مهره به خانه‌ی تازه می‌لغزد؛ مهره‌ی گرفته‌شده در خودش فرو می‌رود
