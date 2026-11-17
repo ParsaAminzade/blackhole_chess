@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>افق رویداد — شطرنج</title>
+  <meta name="description" content="شطرنج با ربات یا آنلاین با دوست. همه‌ی حرکت‌ها ذخیره می‌شود.">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#04050a">
+  <link rel="preload" href="/fonts/AbarFaNum-VF.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- فضا: ستاره‌ها و ابرهای رنگی پشتِ همه‌چیز -->
+  <canvas id="stars" class="stars" aria-hidden="true"></canvas>
+  <div class="nebula" aria-hidden="true"></div>
+
+  <!-- رنگ‌های مهره‌ها -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="gw" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset=".5" stop-color="#dbe5ff"/>
+        <stop offset="1" stop-color="#7f8dc0"/>
+      </linearGradient>
+      <linearGradient id="gb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#666d93"/>
+        <stop offset=".45" stop-color="#1b1e33"/>
+        <stop offset="1" stop-color="#04050b"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <header class="bar glass">
+    <a class="brand" href="/#menu" id="brand" aria-label="افق رویداد، منوی اصلی">
+      <i class="brand-mark" aria-hidden="true"></i>
+      <span>افق رویداد</span>
+    </a>
+    <div class="bar-end">
+      <span class="conn" id="conn" role="status" hidden></span>
+      <span class="who" id="who" hidden>
+        <a class="link" id="who-name" href="/#profile"></a>
+        <button type="button" class="link" id="logout">خروج</button>
+      </span>
+    </div>
+  </header>
+
+  <!-- ۱) صفحه‌ی شروع -->
+  <main id="splash" class="screen splash" hidden>
+    <div class="hero">
+      <div class="hole hole-hero" aria-hidden="true">
+        <i class="halo"></i><i class="ring"></i><i class="disk"></i><i class="shadow"></i><i class="disk front"></i>
+      </div>
+      <h1>افق رویداد</h1>
+      <p class="lede">شطرنج در لبه‌ی سیاه‌چاله</p>
+      <p class="body">با ۲۰ ربات با سبک‌های مختلف بازی کنید یا دوستتان را به بازی آنلاین دعوت کنید. همه‌ی حرکت‌ها ذخیره می‌شود.</p>
+      <button type="button" class="btn primary big" id="start">شروع</button>
+    </div>
+  </main>
+
+  <!-- ۲) ورود -->
+  <main id="auth" class="screen auth" hidden>
+    <section class="card glass auth-card">
+      <h1>ورود به بازی</h1>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-tab="login" aria-selected="true">ورود</button>
+        <button type="button" role="tab" data-tab="register" aria-selected="false">ثبت‌نام</button>
+        <button type="button" role="tab" data-tab="guest" aria-selected="false">مهمان</button>
+      </div>
+
+      <form id="auth-form" novalidate>
+        <label class="field" id="f-username">
+          <span>نام کاربری</span>
+          <input id="username" type="text" maxlength="20" autocomplete="username" autocapitalize="none" spellcheck="false">
+          <small id="username-hint">۳ تا ۲۰ حرف یا عدد، بدون فاصله</small>
+        </label>
+        <label class="field" id="f-password">
+          <span>رمز عبور</span>
+          <span class="pass-row">
+            <input id="password" type="password" maxlength="200" autocomplete="current-password">
+            <button type="button" class="link" id="toggle-pass" aria-pressed="false">نمایش</button>
+          </span>
+          <small id="password-hint">حداقل ۸ کاراکتر</small>
+        </label>
+        <label class="field" id="f-guest" hidden>
+          <span>نام شما <small>(اختیاری)</small></span>
+          <input id="guest-name" type="text" maxlength="24" autocomplete="nickname" placeholder="مثلاً علی">
+          <small>بدون حساب، بازی‌ها فقط به همین مرورگر وصل می‌ماند.</small>
+        </label>
+        <p class="form-error" id="auth-error" role="alert" hidden></p>
+        <button class="btn primary" type="submit" id="auth-submit">ورود</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- ۳) منو -->
+  <main id="menu" class="screen menu" hidden>
+    <h1 id="hello">سلام</h1>
+    <p class="sub">چطور می‌خواهید بازی کنید؟</p>
+
+    <button type="button" class="card glass resume" id="resume" hidden>
+      <i class="avatar" id="resume-avatar" aria-hidden="true"></i>
+      <span><b id="resume-title"></b><small>بازی نیمه‌تمام شما ذخیره شده است</small></span>
+      <span class="chip ok">ادامه</span>
+    </button>
+
+    <section id="unfinished" class="unfinished" hidden>
+      <h2>بازی‌های نیمه‌تمام</h2>
+      <div id="unfinished-list" class="unfinished-list"></div>
+    </section>
+
+    <div class="modes">
+      <section class="card glass mode">
+        <i class="mode-icon i-bot" aria-hidden="true"></i>
+        <h2>بازی با ربات</h2>
+        <p>۲۰ شخصیت با سبک و ترفند مخصوص خودشان. بدون اینترنت هم کار می‌کند.</p>
+        <a class="btn primary" href="#bots">انتخاب حریف</a>
+      </section>
+
+      <section class="card glass mode">
+        <i class="mode-icon i-online" aria-hidden="true"></i>
+        <h2>آنلاین با دوست</h2>
+        <p>بازی را بسازید و لینکش را برای دوستتان بفرستید.</p>
+        <label class="choice"><input type="checkbox" id="random960"><span><b>چیدمان تصادفی</b><small>مهره‌های ردیف آخر تصادفی چیده می‌شوند؛ قلعه ندارد</small></span></label>
+        <div class="pair">
+          <button type="button" class="btn ghost" data-create="duo" data-side="white">با مهره‌ی سفید</button>
+          <button type="button" class="btn ghost" data-create="duo" data-side="black">با مهره‌ی سیاه</button>
+        </div>
+      </section>
+
+      <section class="card glass mode">
+        <i class="mode-icon i-local" aria-hidden="true"></i>
+        <h2>دو نفره روی همین دستگاه</h2>
+        <p>هر دو رنگ از همین صفحه بازی می‌شود.</p>
+        <label class="field"><span>نام نفر دوم <small>(سیاه، اختیاری)</small></span><input id="name2" type="text" maxlength="24" placeholder="مثلاً سارا"></label>
+        <button type="button" class="btn ghost" data-create="solo" data-side="white">شروع بازی</button>
+      </section>
+    </div>
+    <p class="form-error" id="menu-error" role="alert" hidden></p>
+  </main>
+
+  <!-- پروفایل -->
+  <main id="profile" class="screen profile" hidden>
+    <section class="card glass profile-card">
+      <a class="link" href="/#menu">بازگشت به منو</a>
+      <div class="pf-head">
+        <div class="pf-level"><small>سطح</small><b id="pf-level">–</b></div>
+        <div><h1 id="pf-name"></h1><p class="sub" id="pf-kind"></p></div>
+      </div>
+      <div class="xp"><i id="pf-bar"></i></div>
+      <p class="sub" id="pf-xp"></p>
+      <div class="stats">
+        <div><b id="pf-games">–</b><small>بازی</small></div>
+        <div><b id="pf-wins">–</b><small>برد</small></div>
+        <div><b id="pf-draws">–</b><small>مساوی</small></div>
+        <div><b id="pf-losses">–</b><small>باخت</small></div>
+      </div>
+      <p class="sub">برد از ربات‌های قوی‌تر امتیاز بیشتری دارد. بازی روی یک دستگاه حساب نمی‌شود.</p>
+    </section>
+  </main>
+
+  <!-- ۴) انتخاب ربات -->
+  <main id="bots" class="screen bots" hidden>
+    <div class="bots-head">
+      <a class="link" href="#menu">بازگشت به منو</a>
+      <h1>حریف را انتخاب کنید</h1>
+      <p class="sub">از ساده به سخت چیده شده‌اند. هر کدام سبک خودش را دارد.</p>
+    </div>
+    <div class="bots-body">
+      <div class="bot-grid" id="bot-grid" role="listbox" aria-label="ربات‌ها"></div>
+
+      <aside class="card glass bot-detail" id="bot-detail" aria-live="polite">
+        <i class="avatar big" id="bd-avatar" aria-hidden="true"></i>
+        <h2 id="bd-name"></h2>
+        <p class="bd-title" id="bd-title"></p>
+        <div class="level" id="bd-level"></div>
+        <p id="bd-desc"></p>
+        <h3>ترفندها و سبک</h3>
+        <div class="chips" id="bd-tricks"></div>
+        <fieldset>
+          <legend>رنگ مهره‌ی شما</legend>
+          <div class="seg" id="bd-color">
+            <label><input type="radio" name="botcolor" value="w" checked><span>سفید</span></label>
+            <label><input type="radio" name="botcolor" value="b"><span>سیاه</span></label>
+            <label><input type="radio" name="botcolor" value="r"><span>تصادفی</span></label>
+          </div>
+        </fieldset>
+        <button type="button" class="btn primary" id="bot-start">شروع بازی</button>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ۵) صفحه‌ی بازی -->
+  <main id="table" class="screen table" hidden>
+    <section class="stage">
+      <div class="now">
+        <h1 id="headline">…</h1>
+        <p id="subline"></p>
+      </div>
+
+      <div class="board-wrap">
+        <div class="hole hole-board" aria-hidden="true">
+          <i class="halo"></i><i class="ring"></i><i class="disk"></i><i class="shadow"></i><i class="disk front"></i>
+        </div>
+        <div class="board-frame glass">
+          <div id="board" class="board" role="grid" aria-label="صفحه‌ی شطرنج"></div>
+          <div id="promo" class="promo" hidden>
+            <p>سرباز به چه مهره‌ای تبدیل شود؟</p>
+            <div id="promo-options" class="promo-options"></div>
+            <button type="button" class="btn ghost" id="promo-cancel">انصراف</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card glass bot-card" id="bot-card" hidden>
+        <i class="avatar" id="bc-avatar" aria-hidden="true"></i>
+        <div>
+          <h2 id="bc-name"></h2>
+          <p id="bc-title"></p>
+        </div>
+        <div class="chips" id="bc-tricks"></div>
+      </section>
+
+      <section class="card glass players" aria-label="بازیکنان">
+        <div class="player" id="player-w">
+          <i class="orb orb-w" aria-hidden="true"></i>
+          <span class="pside">سفید</span>
+          <span class="pname"></span>
+          <span class="clock"></span>
+          <span class="chip presence"></span>
+        </div>
+        <div class="player" id="player-b">
+          <i class="orb orb-b" aria-hidden="true"></i>
+          <span class="pside">سیاه</span>
+          <span class="pname"></span>
+          <span class="clock"></span>
+          <span class="chip presence"></span>
+        </div>
+        <p class="role" id="role"></p>
+      </section>
+
+      <section class="card glass invite" id="invite" hidden>
+        <p>منتظر بازیکن دوم. این لینک را برایش بفرستید:</p>
+        <div class="invite-row">
+          <input id="invite-link" type="text" readonly dir="ltr" aria-label="لینک بازی">
+          <button type="button" class="btn primary small" id="copy">کپی</button>
+        </div>
+      </section>
+
+      <section class="card glass saved">
+        <header>
+          <h2>فایل بازی</h2>
+          <span class="chip" id="saved-count"></span>
+        </header>
+        <p>همه‌ی حرکت‌ها ذخیره می‌شود. فایل را دانلود کنید و همان را برای تحلیل به هوش مصنوعی بدهید.</p>
+        <a class="btn ghost" id="download" href="#">دانلود فایل حرکت‌ها</a>
+      </section>
+
+      <section class="actions">
+        <button type="button" class="btn ghost" id="undo" hidden>برگشت یک حرکت</button>
+        <button type="button" class="btn ghost danger" id="resign" hidden>تسلیم</button>
+        <span id="resign-confirm" hidden>
+          <span>مطمئنید؟</span>
+          <button type="button" class="btn ghost danger" id="resign-yes">بله، تسلیم می‌شوم</button>
+          <button type="button" class="btn ghost" id="resign-no">نه</button>
+        </span>
+        <a class="btn primary" id="again" href="/#menu" hidden>بازی جدید</a>
+        <a class="btn ghost" id="to-menu" href="/#menu">منو</a>
+      </section>
+    </aside>
+  </main>
+
+  <main id="lost" class="screen lost" hidden>
+    <div class="card glass">
+      <h1>بازی پیدا نشد</h1>
+      <p>لینک را دوباره بررسی کنید یا یک بازی جدید بسازید.</p>
+      <a class="btn primary" href="/#menu">منوی اصلی</a>
+    </div>
+  </main>
+
+  <!-- درخواستِ برگشت، پیامِ کوتاه و گفت‌وگو (فقط بازیِ آنلاین) -->
+  <div id="undo-ask" class="notice glass" role="alertdialog" aria-label="درخواست برگشت" hidden>
+    <span>حریف می‌خواهد یک حرکت به عقب برگردد. موافقید؟</span>
+    <button type="button" class="btn primary small" id="undo-yes">بله</button>
+    <button type="button" class="btn ghost small" id="undo-no">نه</button>
+  </div>
+  <div id="toast" class="notice glass" role="status" hidden></div>
+  <div id="update-ask" class="notice glass" role="status" hidden>
+    <span>نسخهٔ تازهٔ بازی آماده است.</span>
+    <button type="button" class="btn primary small" id="update-go">به‌روزرسانی</button>
+  </div>
+  <button type="button" id="set-open" class="btn ghost small set-open" aria-controls="settings">تنظیمات</button>
+  <section id="settings" class="settings glass" aria-label="تنظیمات" hidden>
+    <b>کیفیت تصویر</b>
+    <div class="q-row">
+      <button type="button" class="btn ghost small" data-q="auto">خودکار</button>
+      <button type="button" class="btn ghost small" data-q="low">کم</button>
+      <button type="button" class="btn ghost small" data-q="mid">متوسط</button>
+      <button type="button" class="btn ghost small" data-q="high">زیاد</button>
+    </div>
+    <small>کم: بدون افکت، برای گوشی ضعیف. متوسط: بدون تاری شیشه. زیاد: همهٔ افکت‌ها.</small>
+  </section>
+  <button type="button" id="chat-open" class="btn ghost chat-open" hidden>گفت‌وگو <span class="chip ok" id="chat-badge" hidden></span></button>
+  <section id="chat" class="chat glass" aria-label="گفت‌وگو" hidden>
+    <div id="chat-list" class="chat-list" aria-live="polite"></div>
+    <form id="chat-form">
+      <input id="chat-input" type="text" maxlength="300" placeholder="پیام…" autocomplete="off" aria-label="پیام">
+      <button type="submit" class="btn primary small">ارسال</button>
+    </form>
+  </section>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

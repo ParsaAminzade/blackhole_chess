@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "event-horizon-chess",
+  "main": "src/worker.js",
+  "compatibility_date": "2025-10-01",
+  // رابط کاربری (فایل‌های ایستا)
+  "assets": { "directory": "./public" },
+  // هر بازی یک «اتاق» زنده دارد که دو بازیکن را به هم وصل می‌کند
+  "durable_objects": {
+    "bindings": [{ "name": "GAME", "class_name": "GameRoom" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["GameRoom"] }],
+  // همه‌ی بازی‌ها و حرکت‌ها در این پایگاه‌داده ثبت می‌شوند
+  "d1_databases": [{ "binding": "DB", "database_name": "event-horizon-chess-db", "database_id": "e1666cc5-fbc9-4f1d-98b9-0d4ea476b868" }]
+}
